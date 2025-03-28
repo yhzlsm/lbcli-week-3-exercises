@@ -103,90 +103,26 @@ jobs:
             exit 1
           fi
 
-      - name: 06.sh - Validate PSBT Multisig Workflow Exercise
+      - name: 06.sh - Verify Hash for Partially Signed Bitcoin Transaction
         run: |
           chmod +x submission/06.sh
-          echo "Validating 06.sh template structure..."
-
-          # Check that all required functions are defined
-          REQUIRED_FUNCTIONS=(
-            "create_multisig_wallet"
-            "setup_multisig_keys"
-            "create_multisig_address"
-            "import_multisig_to_wallet"
-            "fund_multisig_address"
-            "verify_multisig_funding"
-            "create_multisig_psbt"
-            "sign_psbt"
-            "analyze_psbt"
-            "finalize_psbt"
-            "broadcast_transaction"
-            "run_multisig_workflow"
-          )
-
-          MISSING_FUNCTIONS=()
-          for func in "${REQUIRED_FUNCTIONS[@]}"; do
-            if ! grep -q "function $func" submission/06.sh; then
-              MISSING_FUNCTIONS+=("$func")
-            fi
-          done
-
-          if [ ${#MISSING_FUNCTIONS[@]} -gt 0 ]; then
-            echo "❌ Error: The following required functions are missing from the template:"
-            for func in "${MISSING_FUNCTIONS[@]}"; do
-              echo "  - $func"
-            done
-            exit 1
+          HASH=$(submission/06.sh)
+          if [[ "$HASH" == "ea73a631b456d2b041ed73bf5767946408c6ff067716929a68ecda2e3e4de6d3" ]]; then
+            echo "✅ Success: Hash Verification for Partially Signed Bitcoin Transaction passed!"
           else
-            echo "✅ All required functions are defined in the template!"
-          fi
-
-          # Check that the main workflow function is called at the end
-          if ! grep -q "run_multisig_workflow" submission/06.sh | tail -10; then
-            echo "❌ Error: The run_multisig_workflow function is not called at the end of the script!"
+            echo "❌ Error: Hash Verification for Partially Signed Bitcoin Transaction failed!"
             exit 1
           fi
 
-          # Verify that key variables are properly defined
-          EXPECTED_VARS=(
-            "PUBKEY1="
-            "PUBKEY2="
-            "PUBKEY3="
-            "DESCRIPTOR="
-            "MULTISIG_ADDRESS="
-            "REDEEM_SCRIPT="
-            "UTXO="
-            "UTXO_TXID="
-            "UTXO_VOUT="
-            "UTXO_AMOUNT="
-            "PSBT="
-            "FINALIZED_PSBT="
-            "HEX_TX="
-          )
-
-          MISSING_VARS=()
-          for var in "${EXPECTED_VARS[@]}"; do
-            if ! grep -q "$var" submission/06.sh; then
-              MISSING_VARS+=("$var")
-            fi
-          done
-
-          if [ ${#MISSING_VARS[@]} -gt 0 ]; then
-            echo "❌ Error: The following expected variable declarations might be missing from the template:"
-            for var in "${MISSING_VARS[@]}"; do
-              echo "  - $var"
-            done
-            exit 1
+      - name: 07.sh - Verify Receivers Address Partially Signed Bitcoin Transaction
+        run: |
+          chmod +x submission/07.sh
+          ADD=$(submission/07.sh)
+          if [[ "$ADD" == "bcrt1qcaedd724gts3aug73m78c7nfsv9d8zs9znw8py" ]]; then
+            echo "✅ Success: Address Verification for Partially Signed Bitcoin Transaction passed!"
           else
-            echo "✅ All expected variable declarations are present in the template!"
-          fi
-
-          # check that the HEX_TX varibale can be decoded
-          if ! bitcoin-cli -regtest decoderawtransaction "$HEX_TX" > /dev/null 2>&1; then
-            echo "❌ Error: The HEX_TX variable cannot be decoded!"
+            echo "❌ Error: Address Verification for Partially Signed Bitcoin Transaction failed!"
             exit 1
-          else
-            echo "✅ The HEX_TX variable can be decoded!"
           fi
 
-          echo "✅ final validation passed!"
+      
