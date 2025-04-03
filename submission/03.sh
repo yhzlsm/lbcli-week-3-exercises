@@ -4,7 +4,6 @@ transaction="02000000000104b5f641e80e9065f09b12f3e373072518885d1bd1ddd9298e5b984
 
 RAW_TRANSACTION=$(bitcoin-cli -regtest decoderawtransaction $transaction true)
 INPUTS=$(echo "$RAW_TRANSACTION" | jq -r '.vin[] .txinwitness[1]' | sed 's/^/"/;s/$/"/' | tr '\n' ',' | sed 's/,$//')
-MULTISIG_ADDRESS=$(bitcoin-cli -named -regtest createmultisig nrequired=1 keys="[$INPUTS]")
-echo "$RAW_TRANSACTION"
-echo "$INPUTS"
+MULTISIG_ADDRESS=$(bitcoin-cli -named -regtest createmultisig nrequired=1 keys="[$INPUTS]" | jq -r '.address')
+
 echo "$MULTISIG_ADDRESS"
